@@ -38,7 +38,18 @@ def create_dataset(config):
         type2class = {
             ModelType.DEBIAS: 'DebiasDataset',
         }
-        dataset_class = getattr(dataset_module, type2class[model_type])
+        if model_type in type2class:
+            dataset_class = getattr(dataset_module, type2class[model_type])
+        else:
+            from recbole.utils.enum_type import ModelType as RecBoleModelType
+            from recbole.data import dataset as recbole_dataset_module
+            recbole_type2class = {
+                RecBoleModelType.GENERAL: 'Dataset',
+                RecBoleModelType.SEQUENTIAL: 'SequentialDataset',
+                RecBoleModelType.KNOWLEDGE: 'KnowledgeBasedDataset',
+                RecBoleModelType.DECISIONTREE: 'Dataset'
+            }
+            dataset_class = getattr(recbole_dataset_module, recbole_type2class.get(model_type, 'Dataset'))
 
     default_file = os.path.join(config['checkpoint_dir'], f'{config["dataset"]}-{dataset_class.__name__}.pth')
     file = config['dataset_save_path'] or default_file
@@ -134,8 +145,12 @@ def get_dataloader(config, phase):
 
     model_type = config['MODEL_TYPE']
     if phase == 'train':
-        if model_type == ModelType.DEBIAS:
+        from recbole_debias.utils import ModelType as DebiasModelType
+        if model_type == DebiasModelType.DEBIAS:
             return DebiasDataloader
+        else:
+            from recbole.data.dataloader import TrainDataLoader
+            return TrainDataLoader
     else:
         eval_mode = config["eval_args"]["mode"]
         if eval_mode == "full":

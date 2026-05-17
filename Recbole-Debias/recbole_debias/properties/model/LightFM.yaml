@@ -1,0 +1,8 @@
+# LightFM configuration for fair comparison in Recbole-Debias
+
+# Architecture parameters
+embedding_size: 64      # (int) The embedding size of users and items.
+
+# Training parameters synchronized for Fairness (as specified in ml.md)
+learning_rate: 0.005    # Set to match MF's best config
+train_batch_size: 2048  # Set to match MF's best config
